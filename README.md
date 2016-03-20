@@ -1,41 +1,21 @@
-### Topics
+This is the code for my [Intro to Robotics](http://www.clintonliddick.com/articles/intro-to-robotics-part-1/) series.
 
-- objects
-  - rigid bodies
-  - collision shapes
-  - visual representation
-  - joints/constraints
-- simulation environment (space)
-- teleoperation
-  - manual
-  - guarded
-  - shared autonomy
-- collision detection
-  - broad phase
-    - AABB
-    - Circles
-  - sampling
-    - Van der Corput
-- visualization
-- planning
-  - path planning
-    - A*
-    - PRM
-  - trajectories
-  - motion planning
-- kinematics
-  - forward
-  - inverse
-- controllers
-  - PID
-- perception
-  - sensor types
-    - image
-    - tactile
-    - odometry
-    - location
-  - computer vision
-- manipulation
-  - collision manifold
-  - grasping
+To install dependencies run:
+
+```bash
+cd robotics_intro
+pip install -r requirements.txt
+```
+
+or install a development version of the package:
+
+```bash
+pip install -e robotics_intro
+```
+
+All modules (excluding `roboticsintro.common`) can be run directly from the command line:
+
+```bash
+python -m roboticsintro.hellorobot.simple
+```
 

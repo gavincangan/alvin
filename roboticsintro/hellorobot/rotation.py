@@ -7,7 +7,7 @@ from pyglet.window import key
 from ..common import M_TO_PIXELS
 
 
-def unit_heading_vector(theta=0.0):
+def unit_direction_vector(theta=0.0):
     return cos(theta), sin(theta)
 
 
@@ -54,7 +54,7 @@ def run():
         linear_speed = 0.6  # m/s
         distance = linear_speed * dt * M_TO_PIXELS  # m/s * s -> pixels
         # calculate linear displacement before updating rotation
-        heading = unit_heading_vector(rob_body.angle)
+        heading = unit_direction_vector(rob_body.angle)
         displacement = tuple([distance * x for x in heading])  # a discrete "jump" in space
         # TODO try post-rotation
 

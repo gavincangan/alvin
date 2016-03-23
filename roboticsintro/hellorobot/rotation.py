@@ -48,7 +48,7 @@ def run():
 
     # use keyboard to control Rob
     def process_user_input(dt):
-        angular_vel = 0.2 * 2 * pi  # rotations/sec -> radians / second
+        angular_vel = 0.2 * 2 * pi  # rotations/sec -> radians/second
         angular_delta = angular_vel * dt
 
         linear_speed = 0.6  # m/s
@@ -56,7 +56,6 @@ def run():
         # calculate linear displacement before updating rotation
         heading = unit_direction_vector(rob_body.angle)
         displacement = tuple([distance * x for x in heading])  # a discrete "jump" in space
-        # TODO try post-rotation
 
         # direction
         if keyboard[key.RIGHT]:

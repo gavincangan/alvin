@@ -54,11 +54,12 @@ class Twist(object):
     """2D motion described by velocity components
 
     :ivar roboticsintro.common.Vector linear: linear component of twist
-    :ivar float angular: angular component of twist
+    :ivar float angular: angular component of twist (z-axis rotation)
     """
     def __init__(self, x=0., y=0., theta=0.):
         self.linear = Vector(x, y)
         self.angular = theta
 
     def __str__(self):
-        return "Twist {{linear: {}, angular: {}}}".format(self.linear, self.angular)
+        return "Twist {{linear: {}, angular: {}}}".format(
+            self.linear, self.angular)

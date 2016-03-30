@@ -24,7 +24,7 @@ class DiffDriveBot(object):
 
     def control_step(self, dt):
         """Execute one control step for robot.
-        
+
         control_step should be called regularly and at high frequency
         to ensure propper execution.
 
@@ -35,8 +35,6 @@ class DiffDriveBot(object):
         # convert robot body-frame input into
         # world-frame velocities for pymunk
         speed = self._command.linear.x
-        # normalized_heading = normalize_angle(self.body.angle)
-        # velocity = unit_direction_vector(normalized_heading) * speed
         velocity = unit_direction_vector(self.body.angle) * speed
 
         self.body.velocity.x = velocity.x

@@ -7,9 +7,9 @@ from math import pi
 
 from ..planning import turn_and_go_path
 from ..common import Path, Pose, Twist, Vector, M_TO_PIXELS
-from ..common.math import normalize_angle, unit_direction_vector
+from ..common.math import normalize_angle
 from ..common.util import isclose
-from ..common.robots import DiffDriveBot
+from ..robots import DiffDriveBot
 
 LINEAR_SPEED = 0.4 * M_TO_PIXELS
 ANGULAR_VELOCITY = 0.2 * 2 * pi
@@ -47,6 +47,7 @@ def run():
         window.clear()
         label.draw()
         if current_pose_target is not None:
+            # draw line to show path
             pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
                                  ('v2f', (path_start.position.x,
                                           path_start.position.y,
@@ -61,8 +62,9 @@ def run():
         global current_pose_target
 
         start = robot.get_pose()
-        goal = Pose(x=x, y=y, theta=robot.get_pose().orientation)
-        current_plan = turn_and_go_path(start, goal)
+        goal = Pose(x=x, y=y, theta=None)
+        current_plan = turn_and_go_path(start, goal,
+                                        LINEAR_TOLERANCE, ANGULAR_TOLERANCE)
         current_pose_target = None
         logger.info("Current plan and target updated")
 
@@ -73,22 +75,28 @@ def run():
             robot.stop()
             if current_plan.length() > 0:
                 current_pose_target = current_plan.next_pose()
-                logger.info("New target set to: {}".format(current_pose_target))
+                logger.info("New target set to: {}".format(
+                    current_pose_target))
                 path_start = robot.get_pose()
             return
 
         command = Twist()
         curr_pose = robot.get_pose()
 
-        displacement = Vector(current_pose_target.position.x - curr_pose.position.x,
-                              current_pose_target.position.y - curr_pose.position.y)
+        displacement = Vector(current_pose_target.position.x -
+                              curr_pose.position.x,
+                              current_pose_target.position.y -
+                              curr_pose.position.y)
         logger.debug("Displacement: {}".format(displacement))
         at_x = isclose(displacement.x, 0., abs_tol=LINEAR_TOLERANCE)
         at_y = isclose(displacement.y, 0., abs_tol=LINEAR_TOLERANCE)
 
         curr_theta_normalized = normalize_angle(curr_pose.orientation)
-        goal_theta_normalized = normalize_angle(current_pose_target.orientation)
-        at_orientation = isclose(curr_theta_normalized, goal_theta_normalized, abs_tol=ANGULAR_TOLERANCE)
+        goal_theta_normalized = normalize_angle(
+            current_pose_target.orientation)
+        at_orientation = isclose(curr_theta_normalized,
+                                 goal_theta_normalized,
+                                 abs_tol=ANGULAR_TOLERANCE)
 
         if at_x and at_y and at_orientation:
             robot.stop()
@@ -104,7 +112,7 @@ def run():
                 command.angular = 0.
             else:
                 theta_delta = 0
-                # determine which direction to turn such that shortest turn is necessary
+                # determine which direction is the shortest turn
                 if goal_theta_normalized > curr_theta_normalized:
                     theta_delta = goal_theta_normalized - curr_theta_normalized
                     command.angular = ANGULAR_VELOCITY if theta_delta < pi else -ANGULAR_VELOCITY

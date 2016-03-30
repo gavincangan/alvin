@@ -1,6 +1,6 @@
 from pymunk import Body, Circle, moment_for_circle
 from ..common import Pose, Twist, M_TO_PIXELS
-from ..common.math import normalize_angle
+from ..common.math import normalize_angle, unit_direction_vector
 
 
 class DiffDriveBot(object):
@@ -20,6 +20,29 @@ class DiffDriveBot(object):
         self.shape = Circle(self.body, rob_radius)
         self.shape.color = 255, 0, 0  # red
 
+        self._command = Twist()
+
+    def control_step(self, dt):
+        """Execute one control step for robot.
+        
+        control_step should be called regularly and at high frequency
+        to ensure propper execution.
+
+        :param dt: time since last control step execution
+        :type dt: float
+        """
+
+        # convert robot body-frame input into
+        # world-frame velocities for pymunk
+        speed = self._command.linear.x
+        # normalized_heading = normalize_angle(self.body.angle)
+        # velocity = unit_direction_vector(normalized_heading) * speed
+        velocity = unit_direction_vector(self.body.angle) * speed
+
+        self.body.velocity.x = velocity.x
+        self.body.velocity.y = velocity.y
+        self.body.angular_velocity = self._command.angular
+
     def set_command(self, twist):
         """Set robot velocity command.
 
@@ -28,12 +51,12 @@ class DiffDriveBot(object):
         """
         if twist is None:
             raise ValueError("Command may not be null. Set zero velocities instead.")
-
-        self.body.velocity = twist.linear.pair()
-        self.body.angular_velocity = twist.angular
+        if twist.linear.y != 0.:
+            raise ValueError("DiffDriveBot cannot move sideways. twist.linear.y must be 0.")
+        self._command = twist
 
     def stop(self):
-        """Immediately stop robot motion."""
+        """Stop robot motion."""
         self.set_command(Twist())
 
     def get_pose(self):

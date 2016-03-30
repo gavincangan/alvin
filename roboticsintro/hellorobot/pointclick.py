@@ -30,13 +30,13 @@ def run():
                               x=window.width//2, y=window.height//20,
                               anchor_x='center', anchor_y='center')
 
-    rob = DiffDriveBot()
-    rob.body.position = 300, 300
+    robot = DiffDriveBot()
+    robot.body.position = 300, 300
     env = pymunk.Space()
-    env.add(rob.body, rob.shape)
+    env.add(robot.body, robot.shape)
 
     global path_start
-    path_start = rob.get_pose().position
+    path_start = robot.get_pose().position
     global current_plan
     current_plan = Path()
     global current_pose_target
@@ -60,25 +60,25 @@ def run():
         global current_plan
         global current_pose_target
 
-        start = rob.get_pose()
-        goal = Pose(x=x, y=y, theta=rob.get_pose().orientation)
+        start = robot.get_pose()
+        goal = Pose(x=x, y=y, theta=robot.get_pose().orientation)
         current_plan = turn_and_go_path(start, goal)
         current_pose_target = None
         logger.info("Current plan and target updated")
 
-    def control_step(dt):
+    def compute_command(dt):
         global current_pose_target
         global path_start
         if current_pose_target is None:
-            rob.stop()
-            if len(current_plan.poses) > 0:
+            robot.stop()
+            if current_plan.length() > 0:
                 current_pose_target = current_plan.next_pose()
                 logger.info("New target set to: {}".format(current_pose_target))
-                path_start = rob.get_pose()
+                path_start = robot.get_pose()
             return
 
         command = Twist()
-        curr_pose = rob.get_pose()
+        curr_pose = robot.get_pose()
 
         displacement = Vector(current_pose_target.position.x - curr_pose.position.x,
                               current_pose_target.position.y - curr_pose.position.y)
@@ -91,21 +91,20 @@ def run():
         at_orientation = isclose(curr_theta_normalized, goal_theta_normalized, abs_tol=ANGULAR_TOLERANCE)
 
         if at_x and at_y and at_orientation:
-            rob.stop()
+            robot.stop()
             current_pose_target = None
         else:
             if at_x and at_y:
                 command.linear.x = 0.
-                command.linear.y = 0.
             else:
-                velocity = unit_direction_vector(curr_theta_normalized) * LINEAR_SPEED
-                command.linear.x = velocity.x
-                command.linear.y = velocity.y
+                # DiffDriveBot only moves linearly in x
+                command.linear.x = LINEAR_SPEED
 
             if at_orientation:
                 command.angular = 0.
             else:
                 theta_delta = 0
+                # determine which direction to turn such that shortest turn is necessary
                 if goal_theta_normalized > curr_theta_normalized:
                     theta_delta = goal_theta_normalized - curr_theta_normalized
                     command.angular = ANGULAR_VELOCITY if theta_delta < pi else -ANGULAR_VELOCITY
@@ -113,9 +112,10 @@ def run():
                     theta_delta = curr_theta_normalized - goal_theta_normalized
                     command.angular = ANGULAR_VELOCITY if theta_delta > pi else -ANGULAR_VELOCITY
 
-            rob.set_command(command)
+            robot.set_command(command)
 
-    pyglet.clock.schedule_interval(control_step, 1.0/120)
+    pyglet.clock.schedule_interval(robot.control_step, 1.0/120)
+    pyglet.clock.schedule_interval(compute_command, 1.0/60)
     pyglet.clock.schedule_interval(env.step, 1.0/60)
 
     # start simulation

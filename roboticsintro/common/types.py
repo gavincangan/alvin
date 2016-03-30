@@ -34,17 +34,20 @@ class Pose(object):
 
 class Path(object):
     def __init__(self, poses=[]):
-        self.poses = deque(poses)
+        self._poses = deque(poses)
 
     def __str__(self):
-        return "Path {}".format(self.poses)
+        return "Path {}".format(self._poses)
+
+    def length(self):
+        return len(self._poses)
 
     def append_pose(self, pose):
         if pose is not None:
-            self.poses.append(pose)
+            self._poses.append(pose)
 
     def next_pose(self):
-        return self.poses.popleft()
+        return self._poses.popleft()
 
 
 class Twist(object):
@@ -58,4 +61,4 @@ class Twist(object):
         self.angular = theta
 
     def __str__(self):
-        return "Twist \{linear: {}, angular: {}\}".format(self.linear, self.angular)
+        return "Twist {{linear: {}, angular: {}}}".format(self.linear, self.angular)

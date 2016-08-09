@@ -24,6 +24,10 @@ def run():
     # setup visualization and user input
     window = pyglet.window.Window(width=600, height=600, visible=False)
 
+    # AV:
+    draw_options = pymunk.pyglet_util.DrawOptions()
+    draw_options.flags = draw_options.DRAW_SHAPES
+
     # help text
     label = pyglet.text.Label('ESC: quit, click to move',
                               font_size=20,
@@ -54,7 +58,9 @@ def run():
                                           current_pose_target.position.x,
                                           current_pose_target.position.y)),
                                  ('c3B', (0, 255, 0, 0, 255, 0)))
-        pymunk.pyglet_util.draw(env)  # draw entire environment
+        # AV
+        #pymunk.pyglet_util.draw(env)  # draw entire environment
+        env.debug_draw(draw_options)
 
     @window.event
     def on_mouse_press(x, y, button, mod):

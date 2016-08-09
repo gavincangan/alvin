@@ -2,8 +2,13 @@ import pyglet
 import pymunk
 import pymunk.pyglet_util
 
+from math import pi, cos, sin
 from pyglet.window import key
 from ..common import M_TO_PIXELS
+
+
+def unit_direction_vector(theta=0.0):
+    return cos(theta), sin(theta)
 
 
 def run():
@@ -12,11 +17,18 @@ def run():
     keyboard = key.KeyStateHandler()
     window.push_handlers(keyboard)
 
+    # AV:
+    draw_options = pymunk.pyglet_util.DrawOptions()
+    draw_options.flags = draw_options.DRAW_SHAPES
+
     # help text
     label = pyglet.text.Label('ESC: quit, arrow-keys: move',
                               font_size=20,
                               x=window.width//2, y=window.height//20,
                               anchor_x='center', anchor_y='center')
+
+    # build simulation environment
+    env = pymunk.Space()
 
     # build Rob the robot
     rob_mass = 1  # 1 kg
@@ -27,29 +39,43 @@ def run():
     rob_shape = pymunk.Circle(rob_body, rob_radius)
     rob_shape.color = 255, 0, 0  # red
 
+    # add Rob to the simulation
+    env.add(rob_body, rob_shape)
+
     # define how to draw the visualization
     @window.event
     def on_draw():
         # always clear and redraw for graphics programming
         window.clear()
         label.draw()
-        pymunk.pyglet_util.draw(rob_shape)  # this is gold right here
+
+        # AV
+        #pymunk.pyglet_util.draw(rob_shape)  # this is gold right here
+        env.debug_draw(draw_options)
 
     # use keyboard to control Rob
     def process_user_input(dt):
-        speed = 0.6  # m/s
-        distance = speed * dt * M_TO_PIXELS  # m/s * s -> pixels
+        angular_vel = 0.2 * 2 * pi  # rotations/sec -> radians/second
+        angular_delta = angular_vel * dt
+
+        linear_speed = 0.6  # m/s
+        distance = linear_speed * dt * M_TO_PIXELS  # m/s * s -> pixels
+        # calculate linear displacement before updating rotation
+        heading = unit_direction_vector(rob_body.angle)
+        displacement = tuple([distance * x for x in heading])  # a discrete "jump" in space
 
         # direction
         if keyboard[key.RIGHT]:
-            rob_body.position += distance, 0
+            rob_body.angle -= angular_delta
         if keyboard[key.LEFT]:
-            rob_body.position -= distance, 0
+            rob_body.angle += angular_delta
         if keyboard[key.UP]:
-            rob_body.position += 0, distance
+            rob_body.position += displacement
         if keyboard[key.DOWN]:
-            rob_body.position -= 0, distance
+            rob_body.position -= displacement
 
+    # update simulation at regular interval
+    pyglet.clock.schedule_interval(env.step, 1.0/60)
     # process input at regular interval
     pyglet.clock.schedule_interval(process_user_input, 1.0/60)
 

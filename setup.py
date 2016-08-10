@@ -12,7 +12,7 @@ config = {
     'packages': find_packages(),
     'install_requires': [
         'pyglet>=1.2.4',
-        'pymunk>=4.0.0'
+        'pymunk>=5.0.0'
     ]
 }
 

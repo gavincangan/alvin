@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pyglet
 import pymunk
 import pymunk.pyglet_util
@@ -73,10 +75,10 @@ def run():
         if keyboard[key.LEFT]:
             twist.angular = ANGULAR_SPEED
         if keyboard[key.UP]:
-            twist.linear.x = LINEAR_SPEED
+            twist.linear = LINEAR_SPEED
             #robot.body.apply_impulse_at_local_point((force, 0), (0,0))
         if keyboard[key.DOWN]:
-            twist.linear.x = -LINEAR_SPEED
+            twist.linear = -LINEAR_SPEED
             #robot.body.apply_impulse_at_local_point((-force, 0), (0,0))
 
         robot.set_command(twist)

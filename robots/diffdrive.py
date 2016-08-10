@@ -1,6 +1,6 @@
 from pymunk import Body, Circle, moment_for_circle
-from ..common import Pose, Twist, M_TO_PIXELS
-from ..common.math import normalize_angle, unit_direction_vector
+from common import Twist, M_TO_PIXELS
+from common.math import normalize_angle
 
 
 class DiffDriveBot(object):
@@ -34,7 +34,7 @@ class DiffDriveBot(object):
 
         # convert robot body-frame input into
         # world-frame velocities for pymunk
-        speed = self._command.linear.x
+        speed = self._command.linear
         #velocity = unit_direction_vector(self.body.angle) * speed
 
         #self.body.velocity.x = velocity.x
@@ -51,8 +51,6 @@ class DiffDriveBot(object):
         """
         if twist is None:
             raise ValueError("Command may not be null. Set zero velocities instead.")
-        if twist.linear.y != 0.:
-            raise ValueError("DiffDriveBot cannot move sideways. twist.linear.y must be 0.")
         self._command = twist
 
     def stop(self):
@@ -60,6 +58,6 @@ class DiffDriveBot(object):
         self.set_command(Twist())
 
     def get_pose(self):
-        return Pose(x=self.body.position.x,
-                    y=self.body.position.y,
-                    theta=normalize_angle(self.body.angle))
+        return (self.body.position.x,
+                self.body.position.y,
+                normalize_angle(self.body.angle))

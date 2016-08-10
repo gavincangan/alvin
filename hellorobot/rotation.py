@@ -70,7 +70,9 @@ def run():
         if keyboard[key.LEFT]:
             rob_body.angle += angular_delta
         if keyboard[key.UP]:
-            rob_body.position += displacement
+            #rob_body.position += displacement
+            force = 100
+            rob_body.apply_impulse_at_local_point((force, 0), (0,0))
         if keyboard[key.DOWN]:
             rob_body.position -= displacement
 

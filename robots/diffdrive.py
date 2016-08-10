@@ -5,20 +5,20 @@ from ..common.math import normalize_angle, unit_direction_vector
 
 class DiffDriveBot(object):
     def __init__(self):
-        rob_mass = 1  # 1 kg
+        self.mass = 1  # 1 kg
         # 0.1 meter radius, converted to pixels for display
-        rob_radius = 0.1 * M_TO_PIXELS
+        self.radius = 0.1 * M_TO_PIXELS
         # moment of inertia for disk
-        rob_I = moment_for_circle(rob_mass, 0, rob_radius)
+        rob_I = moment_for_circle(self.mass, 0, self.radius)
 
-        self.body = Body(rob_mass, rob_I)
+        self.body = Body(self.mass, rob_I)
         self.body.position = 0, 0
         self.body.angle = 0
         self.body.velocity = 0, 0
         self.body.angular_velocity = 0
 
-        self.shape = Circle(self.body, rob_radius)
-        self.shape.color = 255, 0, 0  # red
+        self.shape = Circle(self.body, self.radius)
+        self.shape.color = 127, 0, 255  # a pinkish blue
 
         self._command = Twist()
 
@@ -35,11 +35,13 @@ class DiffDriveBot(object):
         # convert robot body-frame input into
         # world-frame velocities for pymunk
         speed = self._command.linear.x
-        velocity = unit_direction_vector(self.body.angle) * speed
+        #velocity = unit_direction_vector(self.body.angle) * speed
 
-        self.body.velocity.x = velocity.x
-        self.body.velocity.y = velocity.y
+        #self.body.velocity.x = velocity.x
+        #self.body.velocity.y = velocity.y
         self.body.angular_velocity = self._command.angular
+
+        self.body.apply_impulse_at_local_point((speed, 0), (0,0))
 
     def set_command(self, twist):
         """Set robot velocity command.

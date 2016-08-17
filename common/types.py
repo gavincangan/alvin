@@ -1,3 +1,5 @@
+import pyglet
+
 class Twist(object):
     """2D motion described by velocity components
 
@@ -9,5 +11,5 @@ class Twist(object):
         self.angular = angular
 
     def __str__(self):
-        return "Twist {linear: {}, angular: {}}".format(
+        return "Twist {{linear: {}, angular: {}}}".format(
             self.linear, self.angular)

@@ -13,9 +13,9 @@ or install a development version of the package:
 pip install -e alvin
 ```
 
-All modules (excluding `roboticsintro.common`) can be run directly from the command line:
+Execute directly from the command line:
 
 ```bash
-python -m roboticsintro.hellorobot.simple
+alvin.py
 ```
 

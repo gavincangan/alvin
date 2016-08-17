@@ -1,6 +1,6 @@
 from pymunk import Body, Circle, moment_for_circle
 from common import Twist, M_TO_PIXELS
-from common.math import normalize_angle
+from common.angles import normalize_angle
 
 
 class DiffDriveBot(object):
@@ -20,7 +20,7 @@ class DiffDriveBot(object):
         self.shape = Circle(self.body, self.radius)
         self.shape.color = 127, 0, 255  # a pinkish blue
 
-        self._command = Twist()
+        self.command = Twist()
 
     def control_step(self, dt):
         """Execute one control step for robot.
@@ -32,16 +32,9 @@ class DiffDriveBot(object):
         :type dt: float
         """
 
-        # convert robot body-frame input into
-        # world-frame velocities for pymunk
-        speed = self._command.linear
-        #velocity = unit_direction_vector(self.body.angle) * speed
+        self.body.angular_velocity = self.command.angular
 
-        #self.body.velocity.x = velocity.x
-        #self.body.velocity.y = velocity.y
-        self.body.angular_velocity = self._command.angular
-
-        self.body.apply_impulse_at_local_point((speed, 0), (0,0))
+        self.body.apply_impulse_at_local_point((self.command.linear, 0), (0,0))
 
     def set_command(self, twist):
         """Set robot velocity command.
@@ -51,7 +44,7 @@ class DiffDriveBot(object):
         """
         if twist is None:
             raise ValueError("Command may not be null. Set zero velocities instead.")
-        self._command = twist
+        self.command = twist
 
     def stop(self):
         """Stop robot motion."""

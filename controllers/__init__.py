@@ -1,2 +1,5 @@
-from simpleavoider import SimpleAvoider
-from rvoavoider import RVOAvoider
+from simpleavoidercontroller import SimpleAvoiderController
+from rvoavoidercontroller import RVOAvoiderController
+from gauciclustercontroller import GauciClusterController
+from gauciclustercontroller2 import GauciClusterController2
+from mycontroller import MyController

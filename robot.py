@@ -1,13 +1,13 @@
-from pymunk import Body, Circle, moment_for_circle
-from common import Twist, M_TO_PIXELS
-from common.angles import normalize_angle
+from pymunk import Body, Circle, moment_for_circle, ShapeFilter
+from common import Twist, ROBOT_MASK, M_TO_PIXELS
+from common.angles import normalize_angle_0_2pi
 
 
-class DiffDriveBot(object):
+class Robot(object):
     def __init__(self):
         self.mass = 1  # 1 kg
         # 0.1 meter radius, converted to pixels for display
-        self.radius = 0.1 * M_TO_PIXELS
+        self.radius = 0.05 * M_TO_PIXELS
         # moment of inertia for disk
         rob_I = moment_for_circle(self.mass, 0, self.radius)
 
@@ -19,6 +19,7 @@ class DiffDriveBot(object):
 
         self.shape = Circle(self.body, self.radius)
         self.shape.color = 127, 0, 255  # a pinkish blue
+        self.shape.filter = ShapeFilter(categories = ROBOT_MASK)
 
         self.command = Twist()
 
@@ -53,4 +54,4 @@ class DiffDriveBot(object):
     def get_pose(self):
         return (self.body.position.x,
                 self.body.position.y,
-                normalize_angle(self.body.angle))
+                normalize_angle_0_2pi(self.body.angle))

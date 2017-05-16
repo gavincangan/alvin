@@ -3,23 +3,21 @@
 import pyglet
 from math import pi, cos, sin
 from pymunk import ShapeFilter
-from common import WALL_MASK, ROBOT_MASK, RED_PUCK_MASK, GREEN_PUCK_MASK, BLUE_PUCK_MASK
+from common import *
+
+from configsingleton import ConfigSingleton
 
 class RangeScan:
     """ A scan consists of a predfined list of angles, computed lists of ranges and masks, as well as associated constants. """
 
-    """
-    NUMBER_POINTS = 50 
-    ANGLE_MIN = -pi/2.0
-    ANGLE_MAX = pi/2.0
-    """
-    NUMBER_POINTS = 10
-    ANGLE_MIN = -pi/4
-    ANGLE_MAX = pi/4
-    MIN_VALUE = 0
-    MAX_VALUE = 1000
+    def __init__(self, config_section, robot):
 
-    def __init__(self, robot):
+        config = ConfigSingleton.get_instance()
+        self.NUMBER_POINTS = config.getint(config_section, "number_points")
+        self.ANGLE_MIN = config.getfloat(config_section, "angle_min")
+        self.ANGLE_MAX = config.getfloat(config_section, "angle_max")
+        self.RANGE_MIN = config.getfloat(config_section, "range_min")
+        self.RANGE_MAX = config.getfloat(config_section, "range_max")
 
         self.angles = []
         if self.NUMBER_POINTS == 1:
@@ -33,11 +31,12 @@ class RangeScan:
         self.ranges = []
         self.masks = []
 
-        self.INNER_RADIUS = robot.radius + 5
-        self.OUTER_RADIUS = self.INNER_RADIUS + self.MAX_VALUE
+        #self.INNER_RADIUS = robot.radius + 5
+        self.INNER_RADIUS = robot.radius + self.RANGE_MIN
+        self.OUTER_RADIUS = self.INNER_RADIUS + self.RANGE_MAX
 
 class RangeScanner:
-    def __init__(self, detection_mask, acceptance_mask):
+    def __init__(self, range_scan_sec_name, detection_mask, acceptance_mask):
         # The detection mask is used to indicate all types of objects that
         # the sensor should be sensitive to.  However, if a detected object
         # doesn't also match the acceptance mask then it will be treated as
@@ -45,9 +44,11 @@ class RangeScanner:
         self.detection_mask = detection_mask
         self.acceptance_mask = acceptance_mask
 
+        self.range_scan_sec_name = range_scan_sec_name
+
     def compute(self, env, robot, visualize=False):
         """ Returns a Scan taken from the given environment and robot. """
-        scan = RangeScan(robot)
+        scan = RangeScan(self.range_scan_sec_name, robot)
 
         for sensor_angle in scan.angles:
             c = cos(robot.body.angle + sensor_angle)
@@ -62,15 +63,15 @@ class RangeScanner:
             query_info = env.segment_query_first((x1, y1), (x2, y2), 1, \
                                                  shape_filter)
             if query_info == None or query_info.shape == None:
-                scan.ranges.append(scan.MAX_VALUE)
+                scan.ranges.append(scan.RANGE_MAX)
                 scan.masks.append(0)
 
-                if visualize:
-                    pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
-                                 ('v2f', (x1, y1, x2, y2)),
-                                 ('c3B', (127, 127, 127, 127, 127, 127)))
+                #if visualize:
+                #    pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
+                #                 ('v2f', (x1, y1, x2, y2)),
+                #                 ('c3B', (127, 127, 127, 127, 127, 127)))
             else:
-                value = query_info.alpha * scan.MAX_VALUE
+                value = query_info.alpha * scan.RANGE_MAX
                 object_mask = query_info.shape.filter.categories
                 if object_mask & self.acceptance_mask == 0:
                     # The detected shape is not accepted, we will treat
@@ -94,6 +95,18 @@ class RangeScanner:
                         pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
                                      ('v2f', (x1, y1, x2, y2)),
                                      ('c3B', (0, 255, 255, 0, 255, 255)))
+                    elif object_mask == BLAST_LANDMARK_MASK:
+                        pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
+                                     ('v2f', (x1, y1, x2, y2)),
+                                     ('c3B', (255, 100, 100, 255, 100, 100)))
+                    elif object_mask == POLE_LANDMARK_MASK:
+                        pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
+                                     ('v2f', (x1, y1, x2, y2)),
+                                     ('c3B', (100, 100, 255, 100, 100, 255)))
+                    elif object_mask == ARC_LANDMARK_MASK:
+                        pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
+                                     ('v2f', (x1, y1, x2, y2)),
+                                     ('c3B', (100, 255, 100, 100, 255, 100)))
                     elif object_mask == RED_PUCK_MASK:
                         pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
                                      ('v2f', (x1, y1, x2, y2)),
@@ -106,4 +119,6 @@ class RangeScanner:
                         pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
                                      ('v2f', (x1, y1, x2, y2)),
                                      ('c3B', (0, 0, 255, 0, 0, 255)))
+        
+        #print scan.masks
         return scan

@@ -4,7 +4,7 @@ from common import Twist, M_TO_PIXELS
 
 FRONT_THRESHOLD = 10.0 * pi / 180.0
 
-class GauciClusterController(Controller):
+class OldGauciController(Controller):
 
     def react(self, this_robot, sensor_suite, visualize=False):
         twist = Twist()

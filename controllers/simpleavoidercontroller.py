@@ -15,7 +15,7 @@ class SimpleAvoiderController(Controller):
         closestRange = float('inf')
         for i in range(len(range_scan.ranges)):
             r = range_scan.ranges[i]
-            if r < closestRange and r < range_scan.MAX_VALUE:
+            if r < closestRange and r < range_scan.RANGE_MAX:
                 closestI = i
                 closestRange = r
 

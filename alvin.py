@@ -104,7 +104,7 @@ class AlvinSim(pyglet.window.Window):
 
         # Create the walls, robots, pucks, and landmarks
         self.create_border_walls()
-        #self.create_random_walls()
+        self.create_random_walls()
         #self.create_one_wall()
         self.robots = []
         self.pucks = []
